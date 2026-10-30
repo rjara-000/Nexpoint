@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portada</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-dark-subtle text-light font-sans-serif d-flex flex-column min-vh-100">
+
+  <header class="sticky-top">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-warning border-2">
+      <div class="container-fluid">
+
+        <a class="navbar-brand fw-bold text-warning fs-3 me-4" th:href="@{/}">
+          Nexpoint
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navContent">
+
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-2">
+            <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/productos}">Catálogo</a></li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-warning fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                Pokémon TCG
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/productos}">Cartas Sueltas (Singles)</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='booster')}">Booster Boxes & ETB</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos}">Decks Estructura</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                Otras Franquicias
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/productos}">Yu-Gi-Oh! TCG</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos}">One Piece Card Game</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos}">Magic: The Gathering</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                Accesorios
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='micas')}">Micas & Protectores</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='carpetas')}">Carpetas & Álbumes</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='deckboxes')}">Deck Boxes & Playmats</a></li>
+              </ul>
+            </li>
+          </ul>
+
+          <form class="d-flex me-3 flex-grow-1 flex-lg-grow-0 mb-2 mb-lg-0" style="min-width: 250px;" th:action="@{/productos}" method="get" role="search">
+            <div class="input-group">
+              <input class="form-control form-control-sm bg-dark text-light border-secondary" type="search" name="buscar" th:value="${buscar}" placeholder="Buscar cartas, expansiones..." aria-label="Search">
+              <button class="btn btn-sm btn-outline-warning" type="submit">Buscar</button>
+            </div>
+          </form>
+
+          <div class="d-flex align-items-center gap-3">
+            
+            <a th:if="${session.usuarioLogueado == null}" 
+               th:href="@{/login}" 
+               class="text-warning fs-4" 
+               title="Iniciar Sesión">
+              <i class="bi bi-person-circle"></i>
+            </a>
+
+            <div th:if="${session.usuarioLogueado != null}" class="dropdown">
+              <a href="#" class="text-warning fs-4 dropdown-toggle text-decoration-none" data-bs-toggle="dropdown" title="Cuenta Administrador">
+                <i class="bi bi-person-check-fill"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary">
+                <li><span class="dropdown-item-text text-secondary small" th:text="${session.usuarioLogueado}">admin@nexpoint.com</span></li>
+                <li><hr class="dropdown-divider border-secondary"></li>
+                <li>
+                  <a class="dropdown-item text-warning fw-semibold" th:href="@{/gestion-productos}">
+                    <i class="bi bi-gear-fill me-2"></i>Gestión de Productos (CRUD)
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item text-danger" th:href="@{/logout}">
+                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <a th:href="@{/carrito}" class="text-warning fs-4" title="Carrito">
+              <i class="bi bi-bag"></i>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container my-4 flex-grow-1">
+
+    <section class="row mb-4">
+      <div class="col-12">
+        <div class="p-5 text-white rounded-3 shadow d-flex align-items-center border border-secondary" 
+             style="background: linear-gradient(90deg, rgba(13, 15, 18, 0.95) 0%, rgba(13, 15, 18, 0.5) 100%), url('https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat; min-height: 280px;">
+          <div>
+            <span class="badge bg-danger mb-2">¡Lo más buscado!</span>
+            <h1 class="display-4 fw-bold text-warning">POKÉMON TCG: SCARLET & VIOLET</h1>
+            <p class="lead">Consigue tus Booster Boxes, Elite Trainer Boxes y las cartas Ultra Raras más cotizadas.</p>
+            <a th:href="@{/productos}" class="btn btn-warning btn-lg fw-bold mt-2">Ver Catálogo Pokémon</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="p-4 rounded-3 text-white bg-dark border border-secondary shadow-sm">
+          <h4 class="fw-bold mb-1">Cartas Sueltas / Singles</h4>
+          <p class="text-secondary mb-2">Pokémon, Yu-Gi-Oh! & One Piece en stock</p>
+          <a th:href="@{/productos}" class="btn btn-sm btn-outline-warning">Buscar Singles</a>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-4 rounded-3 text-white bg-dark border border-secondary shadow-sm">
+          <h4 class="fw-bold mb-1">Micas & Protectores</h4>
+          <p class="text-secondary mb-2">Dragon Shield, Ultimate Guard & Katana</p>
+          <a th:href="@{/productos}" class="btn btn-sm btn-outline-warning">Ver Protección</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold text-warning mb-0">Accesorios TCG Destacados</h5>
+      <h5 class="fw-bold text-info mb-0 d-none d-md-block">Promoción Especial</h5>
+    </div>
+
+    <section class="row g-4 mb-4">
+      <div class="col-md-6 d-flex flex-column gap-4">
+        <div class="card bg-dark border-secondary h-100">
+          <div class="p-3">
+            <div class="card-body py-1">
+              <span class="badge bg-warning text-dark mb-1">Álbumes TCG</span>
+              <h5 class="card-title fw-bold">Binders Zip-Folio 9 & 12 Pocket</h5>
+              <p class="card-text text-secondary small">Colecciona y protege tus cartas valiosas de cualquier franquicia.</p>
+              <a th:href="@{/productos}" class="btn btn-sm btn-warning">Ver Carpetas</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-dark border-secondary h-100">
+          <div class="p-3">
+            <div class="card-body py-1">
+              <span class="badge bg-success mb-1">Equipamiento Gamer</span>
+              <h5 class="card-title fw-bold">Deck Boxes & Playmats</h5>
+              <p class="card-text text-secondary small">Cajas rígidas y tapetes de neopreno para tus partidas.</p>
+              <a th:href="@{/productos}" class="btn btn-sm btn-success">Ver Todo</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card bg-dark border-secondary h-100 d-flex flex-column justify-content-between p-4" style="min-height: 320px;">
+          <div>
+            <span class="badge bg-danger mb-2">Bundle Coleccionista</span>
+            <h3 class="fw-bold text-warning">Pack Inicial Pokémon</h3>
+            <p class="text-secondary">Incluye: 1 Binder 9-Pocket + 1 Pack Micas Transparentes + 1 Deck Box.</p>
+          </div>
+          <div class="my-4 text-center">
+            <span class="fs-4 text-warning border border-warning px-3 py-2 rounded">Combo Exclusivo</span>
+          </div>
+          <div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-decoration-line-through text-muted">S/. 160.00</span>
+              <span class="fs-4 fw-bold text-success">S/. 125.00</span>
+            </div>
+            <a th:href="@{/carrito}" class="btn btn-warning w-100 fw-bold">Añadir Combo</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-black pt-5 pb-3">
+    <div class="container">
+      <section class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="p-4 bg-dark rounded-3 border border-secondary">
+            <h5 class="fw-bold text-warning mb-2">¿Tienes dudas con tu pedido o buscas cartas exclusivas?</h5>
+            <p class="text-secondary mb-0">Puedes contactarnos directamente por WhatsApp para cotizar cartas sueltas o solicitar productos importados bajo pedido.</p>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="p-4 bg-dark rounded-3 border border-secondary text-center">
+            <h5 class="fw-bold text-light mb-3">Métodos de Pago y Envíos Aceptados</h5>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <span class="badge bg-secondary p-2 fs-6 fw-normal">Yape / Plin</span>
+              <span class="badge bg-secondary p-2 fs-6 fw-normal">Tarjetas de Crédito / Débito</span>
+              <span class="badge bg-secondary p-2 fs-6 fw-normal">Envíos por Shalom / Olva</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="p-4 bg-dark rounded-3 border border-secondary text-center">
+            <h5 class="fw-bold text-light mb-3">Envíos Seguros a Todo el Perú</h5>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <h6 class="fw-bold text-warning mb-1">Empaque Antigolpes</h6>
+                <p class="text-secondary small mb-0">Todas las cartas se envían en funda, toploader y sobre acolchado.</p>
+              </div>
+              <div class="col-md-4">
+                <h6 class="fw-bold text-warning mb-1">Despacho en 24 Horas</h6>
+                <p class="text-secondary small mb-0">Envíos por Shalom, Olva Courier o motorizado en Lima.</p>
+              </div>
+              <div class="col-md-4">
+                <h6 class="fw-bold text-warning mb-1">Garantía de Autenticidad</h6>
+                <p class="text-secondary small mb-0">Productos 100% originales en inglés y español.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="border-secondary my-4">
+
+      <div class="text-center text-secondary">
+        <small>&copy; 2026 Nexpoint - Tienda de Cartas y Accesorios TCG. Todos los derechos reservados.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

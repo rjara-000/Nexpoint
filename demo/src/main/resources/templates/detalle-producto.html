@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${producto.nombre} + ' - Nexpoint TCG'">Detalle de Producto</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-dark-subtle text-light font-sans-serif d-flex flex-column min-vh-100">
+
+  <header class="sticky-top">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-warning border-2">
+      <div class="container-fluid">
+       
+        <a class="navbar-brand fw-bold text-warning fs-3 me-4" th:href="@{/}">
+          Nexpoint
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-2">
+            <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link active" th:href="@{/productos}">Catálogo</a></li>
+            
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-warning fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                Pokémon TCG
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/productos}">Cartas Sueltas (Singles)</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='booster')}">Booster Boxes & ETB</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos}">Decks Estructura</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                Magic: The Gathering
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='magic')}">Cartas Sueltas (MTG)</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='booster')}">Play Booster & Bundles</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                Accesorios
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='micas')}">Micas & Protectores</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='carpetas')}">Carpetas & Álbumes</a></li>
+                <li><a class="dropdown-item" th:href="@{/productos(categoria='deckboxes')}">Deck Boxes & Playmats</a></li>
+              </ul>
+            </li>
+          </ul>
+
+          <form class="d-flex me-3 flex-grow-1 flex-lg-grow-0 mb-2 mb-lg-0" style="min-width: 250px;" th:action="@{/productos}" method="get" role="search">
+            <div class="input-group">
+              <input class="form-control form-control-sm bg-dark text-light border-secondary" type="search" name="buscar" th:value="${buscar}" placeholder="Buscar cartas, expansiones..." aria-label="Search">
+              <button class="btn btn-sm btn-outline-warning" type="submit">Buscar</button>
+            </div>
+          </form>
+
+          <div class="d-flex align-items-center gap-3">
+            <a th:if="${session.usuarioLogueado == null}"
+               th:href="@{/login}"
+               class="text-warning fs-4"
+               title="Iniciar Sesión">
+              <i class="bi bi-person-circle"></i>
+            </a>
+
+            <div th:if="${session.usuarioLogueado != null}" class="dropdown">
+              <a href="#" class="text-warning fs-4 dropdown-toggle text-decoration-none" data-bs-toggle="dropdown" title="Cuenta Administrador">
+                <i class="bi bi-person-check-fill"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end bg-dark border-secondary">
+                <li><span class="dropdown-item-text text-secondary small" th:text="${session.usuarioLogueado}">admin@nexpoint.com</span></li>
+                <li><hr class="dropdown-divider border-secondary"></li>
+                <li>
+                  <a class="dropdown-item text-warning fw-semibold" th:href="@{/gestion-productos}">
+                    <i class="bi bi-gear-fill me-2"></i>Gestión de Productos (CRUD)
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item text-danger" th:href="@{/logout}">
+                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <a th:href="@{/carrito}" class="text-warning fs-4 position-relative" title="Carrito">
+              <i class="bi bi-bag"></i>
+              <span th:if="${session.totalCarrito != null and session.totalCarrito > 0}" 
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger fs-6"
+                    th:text="${session.totalCarrito}">0</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="container my-4 flex-grow-1">
+
+    <nav aria-label="breadcrumb" class="mb-2">
+      <ol class="breadcrumb small text-secondary">
+        <li class="breadcrumb-item"><a th:href="@{/productos}" class="text-warning text-decoration-none">Todas las Categorías</a></li>
+        <li class="breadcrumb-item"><a th:href="@{/productos}" class="text-warning text-decoration-none" th:text="${producto.categoria != null ? producto.categoria.nombre : 'Pokémon TCG'}">Categoría</a></li>
+        <li class="breadcrumb-item active text-light" aria-current="page" th:text="${producto.nombre}">Nombre de Carta</li>
+      </ol>
+    </nav>
+
+    <div class="mb-3">
+      <h2 class="fw-bold text-light mb-0" th:text="${producto.nombre} + ' - ' + (${producto.categoria != null ? producto.categoria.nombre : 'TCG'})">Charizard VMAX - Pokémon TCG</h2>
+      <span class="text-secondary small" th:text="${producto.subtitulo != null ? producto.subtitulo : producto.descripcion}">Subtítulo o edición</span>
+    </div>
+
+    <div class="row g-4 mb-5">
+      
+      <!-- IMAGEN DEL PRODUCTO -->
+      <div class="col-lg-4 text-center">
+        <div class="p-3 bg-dark border border-secondary rounded-3 shadow-sm d-flex align-items-center justify-content-center" style="min-height: 420px;">
+          <img th:src="${producto.imagen != null and !#strings.isEmpty(producto.imagen) ? producto.imagen : 'https://images.pokemontcg.io/swsh45/SV107_hires.png'}" 
+               src="https://images.pokemontcg.io/swsh45/SV107_hires.png" 
+               class="img-fluid rounded shadow" 
+               style="max-height: 390px; object-fit: contain;" 
+               alt="Producto TCG"
+               onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh45/SV107_hires.png';">
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card bg-dark border-secondary h-100 p-3">
+          
+          <div th:if="${producto.categoria != null and producto.categoria.nombre.toLowerCase().contains('magic')}">
+            <h5 class="fw-bold text-warning border-bottom border-secondary pb-2 mb-3">Product Details</h5>
+            
+            <p class="fs-6 text-light mb-3" style="white-space: pre-line;" th:text="${producto.cardText}">Card Text / Oracle Text...</p>
+            
+            <ul class="list-unstyled d-flex flex-column gap-2 text-light small">
+              <li><strong>Rarity:</strong> <span class="text-secondary" th:text="${producto.numeroRareza != null ? producto.numeroRareza : 'M'}">M</span></li>
+              <li><strong>#:</strong> <span class="text-secondary" th:text="${producto.subtitulo}">34</span></li>
+              <li><strong>Card Type:</strong> <span class="text-secondary" th:text="${producto.tipoHpFase}">Instant</span></li>
+              <li><strong>Casting Cost:</strong> <span class="text-warning" th:text="${producto.ataque1}">{1}{G}</span></li>
+              <li th:if="${producto.ataque2 != null and !#strings.isEmpty(producto.ataque2)}"><strong>Power / Toughness:</strong> <span class="text-secondary" th:text="${producto.ataque2}">4/5</span></li>
+              <li><strong>Artist:</strong> <span class="text-warning" th:text="${producto.ilustrador}">Jack Kirby & Steve Ditko</span></li>
+              <li><strong>Condición:</strong> <span class="badge bg-secondary" th:text="${producto.condicion != null ? producto.condicion : 'Near Mint'}">Near Mint</span></li>
+            </ul>
+          </div>
+
+          <div th:unless="${producto.categoria != null and producto.categoria.nombre.toLowerCase().contains('magic')}">
+            <h5 class="fw-bold text-warning border-bottom border-secondary pb-2 mb-3">Detalles del Producto</h5>
+            
+            <ul class="list-unstyled d-flex flex-column gap-2 text-light small">
+              <li th:if="${producto.numeroRareza != null and !#strings.isEmpty(producto.numeroRareza)}">
+                <strong>Card Number / Rarity:</strong> <span class="text-secondary" th:text="${producto.numeroRareza}">133/086 / Illustration Rare</span>
+              </li>
+              
+              <li th:if="${producto.tipoHpFase != null and !#strings.isEmpty(producto.tipoHpFase)}">
+                <strong>Card Type / HP / Stage:</strong> <span class="text-secondary" th:text="${producto.tipoHpFase}">Darkness / 100 / Stage 1</span>
+              </li>
+
+              <li th:if="${producto.cardText != null and !#strings.isEmpty(producto.cardText)}" class="mt-1">
+                <strong>Card Text:</strong>
+                <div class="p-2 bg-black rounded border border-secondary text-light mt-1" style="white-space: pre-line;" th:text="${producto.cardText}">
+                  Texto descriptivo de la carta...
+                </div>
+              </li>
+              
+              <li th:if="${producto.ataque1 != null and !#strings.isEmpty(producto.ataque1)}" class="mt-1">
+                <strong>Attack 1:</strong> <span class="fw-bold text-warning" th:text="${producto.ataque1}">[C] Venoshock (30+)</span>
+                <div class="text-secondary mt-1 ps-2 border-start border-warning" th:if="${producto.descAtaque1 != null and !#strings.isEmpty(producto.descAtaque1)}" th:text="${producto.descAtaque1}">Efecto del ataque...</div>
+              </li>
+
+              <li th:if="${producto.ataque2 != null and !#strings.isEmpty(producto.ataque2)}">
+                <strong>Attack 2:</strong> <span class="fw-bold text-warning" th:text="${producto.ataque2}">[PP] Ghostly Touch (140)</span>
+              </li>
+
+              <li th:if="${producto.debilidadResistencia != null and !#strings.isEmpty(producto.debilidadResistencia)}">
+                <strong>Weakness / Resistance / Retreat Cost:</strong> <span class="text-secondary" th:text="${producto.debilidadResistencia}">Fx2 // 3</span>
+              </li>
+
+              <li>
+                <strong>Categoría Oficial:</strong> <span class="text-info fw-bold" th:text="${producto.categoria != null ? producto.categoria.nombre : 'Pokémon TCG'}">Pokémon TCG</span>
+              </li>
+
+              <li th:if="${producto.ilustrador != null and !#strings.isEmpty(producto.ilustrador)}">
+                <strong>Artist:</strong> <span class="text-warning" th:text="${producto.ilustrador}">kurumitsu</span>
+              </li>
+
+              <li class="mt-2 pt-2 border-top border-secondary" th:if="${producto.descripcion != null and !#strings.isEmpty(producto.descripcion)}">
+                <strong>Descripción general:</strong>
+                <p class="text-secondary mb-0 mt-1" th:text="${producto.descripcion}">Sin descripción detallada disponible.</p>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-3">
+        <div class="card bg-dark border-warning h-100 p-3 d-flex flex-column justify-content-between shadow">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-patch-check-fill text-warning fs-5"></i>
+              <span class="fw-bold text-warning small">Nexpoint Direct</span>
+            </div>
+            
+            <span class="badge bg-secondary mb-2" th:text="${producto.condicion != null ? producto.condicion : 'Near Mint'}">Near Mint</span>
+            
+            <div class="my-2">
+              <h2 class="fw-bold text-success mb-0">S/. <span th:text="${#numbers.formatDecimal(producto.precioVenta != null ? producto.precioVenta : 0.0, 1, 'POINT', 2, 'COMMA')}">180.00</span></h2>
+              <span class="text-secondary small">+ S/. 8.00 Envío a todo el Perú</span>
+            </div>
+
+            <div class="mt-3 mb-2">
+              <span class="badge bg-success mb-1" th:text="'Stock disponible: ' + ${producto.stockActual != null ? producto.stockActual : 0}">Stock disponible: 10</span>
+              <p class="text-secondary small">Vendido por <strong class="text-light">Nexpoint Store</strong></p>
+            </div>
+
+            <form th:action="@{/agregar-al-carrito}" method="get" class="mt-3">
+              <input type="hidden" name="idProducto" th:value="${producto.idProducto != null ? producto.idProducto : producto.id}">
+              
+              <div class="d-flex gap-2 mb-3">
+                <select name="cantidad" class="form-select form-select-sm bg-black text-light border-secondary" style="max-width: 80px;">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+                <span class="align-self-center text-secondary small">unid.</span>
+              </div>
+
+              <button type="submit" class="btn btn-warning w-100 fw-bold py-2 shadow-sm" th:disabled="${producto.stockActual == null or producto.stockActual <= 0}">
+                <i class="bi bi-cart-plus-fill me-1"></i> Agregar al Carrito
+              </button>
+            </form>
+          </div>
+
+          <div class="border-top border-secondary pt-3 mt-3 text-center">
+            <a th:href="@{/productos}" class="btn btn-sm btn-outline-secondary w-100 mb-2">Ver Otros Vendedores</a>
+            <span class="text-secondary" style="font-size: 0.75rem;"><i class="bi bi-shield-check"></i> Garantía de autenticidad 100%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row g-4">
+      
+      <div class="col-lg-7">
+        <div class="card bg-dark border-secondary p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-warning mb-0"><i class="bi bi-graph-up-arrow me-1"></i> Histórico de Precios de Mercado TCGPlayer</h5>
+            <span class="badge bg-success fs-6">Mercado Real: $<span th:text="${precioMercadoReal != null ? precioMercadoReal : '0.00'}">0.00</span> USD</span>
+          </div>
+
+          <div class="p-2 bg-black rounded border border-secondary" style="height: 260px;">
+            <canvas id="marketChart"></canvas>
+          </div>
+
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            <button class="btn btn-sm btn-outline-secondary">1M</button>
+            <button class="btn btn-sm btn-warning fw-bold">3M</button>
+            <button class="btn btn-sm btn-outline-secondary">6M</button>
+            <button class="btn btn-sm btn-outline-secondary">1Y</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card bg-dark border-secondary p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="fw-bold text-warning mb-3">Precios de Comparación (TCGPlayer)</h5>
+            
+            <div class="table-responsive mb-3">
+              <table class="table table-dark table-sm border-secondary align-middle">
+                <tbody>
+                  <tr>
+                    <td>Precio de Mercado Real:</td>
+                    <td class="text-end fw-bold text-success">$<span th:text="${precioMercadoReal != null ? precioMercadoReal : '0.00'}">0.00</span> USD</td>
+                  </tr>
+                  <tr>
+                    <td>Rango de Mercado Alto:</td>
+                    <td class="text-end fw-bold text-info">$<span th:text="${precioAlto != null ? precioAlto : '0.00'}">0.00</span> USD</td>
+                  </tr>
+                  <tr>
+                    <td>Rango de Mercado Bajo:</td>
+                    <td class="text-end text-secondary">$<span th:text="${precioBajo != null ? precioBajo : '0.00'}">0.00</span> USD</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h6 class="fw-bold text-light mt-4 mb-2">Resumen de Mercado de la Carta</h6>
+            <div class="row g-2 text-center">
+              <div class="col-6">
+                <div class="p-2 bg-black rounded border border-secondary">
+                  <span class="text-secondary small d-block">Mínimo Registrado</span>
+                  <strong class="text-warning">$<span th:text="${precioBajo != null ? precioBajo : '0.00'}">0.00</span></strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-2 bg-black rounded border border-secondary">
+                  <span class="text-secondary small d-block">Máximo Registrado</span>
+                  <strong class="text-warning">$<span th:text="${precioAlto != null ? precioAlto : '0.00'}">0.00</span></strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-2 bg-black rounded border border-secondary">
+                  <span class="text-secondary small d-block">Estado de API</span>
+                  <strong class="text-success"><i class="bi bi-wifi me-1"></i> En línea</strong>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="p-2 bg-black rounded border border-secondary">
+                  <span class="text-secondary small d-block">Fuente de Datos</span>
+                  <strong class="text-light">TCGPlayer API</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-black pt-5 pb-3 border-top border-secondary">
+    <div class="container">
+      <section class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="p-4 bg-dark rounded-3 border border-secondary text-start">
+            <h5 class="fw-bold text-warning mb-2">¿Tienes dudas con tu pedido o buscas cartas exclusivas?</h5>
+            <p class="text-secondary mb-0">Puedes contactarnos directamente por WhatsApp para cotizar cartas sueltas o solicitar productos importados bajo pedido.</p>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="p-4 bg-dark rounded-3 border border-secondary text-center">
+            <h5 class="fw-bold text-light mb-3">Métodos de Pago y Envíos Aceptados</h5>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              <span class="badge bg-secondary p-2 fs-6 fw-normal">Yape / Plin</span>
+              <span class="badge bg-secondary p-2 fs-6 fw-normal">Tarjetas de Crédito / Débito</span>
+              <span class="badge bg-secondary p-2 fs-6 fw-normal">Envíos por Shalom / Olva</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="p-4 bg-dark rounded-3 border border-secondary text-center">
+            <h5 class="fw-bold text-light mb-3">Envíos Seguros a Todo el Perú</h5>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <h6 class="fw-bold text-warning mb-1">Empaque Antigolpes</h6>
+                <p class="text-secondary small mb-0">Todas las cartas se envían en funda, toploader y sobre acolchado.</p>
+              </div>
+              <div class="col-md-4">
+                <h6 class="fw-bold text-warning mb-1">Despacho en 24 Horas</h6>
+                <p class="text-secondary small mb-0">Envíos por Shalom, Olva Courier o motorizado en Lima.</p>
+              </div>
+              <div class="col-md-4">
+                <h6 class="fw-bold text-warning mb-1">Garantía de Autenticidad</h6>
+                <p class="text-secondary small mb-0">Productos 100% originales en inglés y español.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="border-secondary my-4">
+
+      <div class="text-center text-secondary">
+        <small>&copy; 2026 Nexpoint - Tienda de Cartas y Accesorios TCG. Todos los derechos reservados.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script th:inline="javascript">
+    const historicoPreciosData = [15.0, 16.2, 15.8, 17.0, 16.5, 18.0, 17.5, 18.0];
+
+    const ctx = document.getElementById('marketChart').getContext('2d');
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 220);
+    gradient.addColorStop(0, 'rgba(245, 158, 11, 0.4)');
+    gradient.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Semana -7', 'Semana -6', 'Semana -5', 'Semana -4', 'Semana -3', 'Semana -2', 'Semana -1', 'Hoy'],
+        datasets: [
+          {
+            label: 'Precio Mercado TCGPlayer ($ USD)',
+            data: historicoPreciosData,
+            borderColor: '#f59e0b',
+            backgroundColor: gradient,
+            borderWidth: 2,
+            tension: 0.35,
+            pointRadius: 4,
+            pointBackgroundColor: '#f59e0b',
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+          y: { 
+            ticks: { 
+              color: '#f59e0b',
+              callback: function(value) { return '$' + value; }
+            }, 
+            grid: { color: '#334155' } 
+          }
+        },
+        plugins: {
+          legend: { labels: { color: '#f8fafc' } }
+        }
+      }
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
