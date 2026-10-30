@@ -26,7 +26,6 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
-    // Método con paginación para el catálogo
     public Page<Producto> listarPaginado(Pageable pageable) {
         return productoRepository.findAll(pageable);
     }
